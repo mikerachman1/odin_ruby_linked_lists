@@ -1,150 +1,135 @@
 class Node
-    attr_accessor :next_node
-    attr_reader :value
-    
-    def initialize (value = nil, next_node = nil)
-        @value = value
-        @next_node = next_node
-    end
+  attr_accessor :pointer
+  attr_reader :value
+  
+  def initialize(value = nil)
+    @value = value
+    @pointer = nil
+  end
 end
 
 class LinkedList
-    attr_reader :head, :tail, :size
-   
-    def initialize
-        @head = nil
-        @tail = nil
-        @size = 0
+  attr_reader :head, :tail, :size
+  def initialize
+    @head = nil
+    @tail = nil
+    @size = 0
+  end
+
+  def append(value)
+    node = Node.new(value)
+    if @head.nil? #start list
+      @head = node
+      @tail = @head
+    else #list contains values
+      @tail.pointer = node
+      @tail = node
     end
+    @size += 1
+    node
+  end
 
-    def begin_list(node)
-        @head = node
-        @tail = @head
+  def prepend(value)
+    node = Node.new(value)
+    if @head.nil? #start list
+      @head = node
+      @tail = @head
+    else #list contains values
+      node.pointer = @head
+      @head = node
     end
-   
-    def find_by_value(value, like_find)
-        current = @head
-        @size.times do
-            return like_find ? current : true if current.value == value
+    @size += 1
+    node
+  end
 
-            current = current.next_node
-        end
-        like_find ? nil : false
+  def at(index)
+    return "index falls outside of list size" if index > (@size - 1)
+
+    i = 0
+    current = @head
+    #loop with stopping condition
+    loop do
+      if i == index || current.pointer.nil?
+        return current
+      end
+      current = current.pointer
+      i += 1
     end
+  end
 
-    def append(value)
-        node = Node.new(value)
-        if @head.nil?
-            begin_list(node)
-        else
-            @tail.next_node = node
-            @tail = @tail.next_node
-        end
-        @size += 1
-        node
+  def pop
+    popped = @tail
+    current = @head
+    (@size - 1).times do
+      current == current.pointer
     end
+    current.pointer = nil
+    current = @tail
+    @size -= 1
+    popped
+  end
 
-    def prepend(value)
-        node = Node.new(value)
-        if @head.nil?
-            begin_list(node)
-        else
-            node.next_node = @head
-            @head = node
-        end
-        @size += 1
-        node
+  def contains?(search_value)
+    current = @head
+    @size.times do
+      return true if current.value == search_value
+      current = current.pointer
     end
+    return false
+  end
 
-    def size
-        puts "Total nodes = #{@size}"
+  def find(search_value)
+    current = @head
+    i = 0
+    @size.times do
+      return i if current.value == search_value
+      current = current.pointer
+      i += 1
     end
+    return "not in list"
+  end
 
-    def head
-        puts "Head node: #{@head}"
+  def to_s
+    current = @head
+    visual = ""
+    @size.times do
+      visual << "( #{current.value} ) -> "
+      current = current.pointer
     end
+    visual << "nil"
+    visual
+  end
 
-    def tail
-        puts "Tail node: #{@tail}"
-    end
+  def insert_at(new_value, index)
+   return "invalid index" if index > (@size - 1)
+   return prepend(new_value) if index == 0 
+   return append(new_value) if index == @size 
 
-    def at(index)
-        current = @head
-        i = 0 
-        loop do
-            return current if index == i
-            current = current.next_node
-            throw 'index out of range' if current.nil?
-            i += 1
-        end
-    end
+   node = Node.new(new_value)
+   prev_node = at(index - 1)
+   node.pointer = prev_node.pointer
+   prev_node.pointer = node
+   @size += 1
+   node
+  end
 
-    def pop
-        popped = @tail
-        @tail = at(@size - 2)
-        @tail.next_node = nil
-        @size -= 1
-        popped
-    end
+  def remove_at(index)  
+    return pop if index == (@size - 1)
+    return "invalid index" if index > (@size - 1)
+    prev_node = at(index - 1)
+    prev_node.pointer = prev_node.pointer.pointer
+    @size -= 1
+  end
 
-    def contains?(value)
-        find_by_value(value, false)
-    end
-
-    def find(value)
-        find_by_value(value, true)
-    end
-
-    def to_s
-        current = @head
-        string = ''
-        loop do 
-            break if current.nil?
-
-            string << "[#{current.value}] ->"
-            break if current.next_node.nil?
-
-            current = current.next_node
-        end
-        "#{string}nil"
-    end
-
-    def insert_at(value, index)
-        return prepend(value) if index.zero?
-        return append(value) if index == @size
-
-        node = Node.new(value)
-        prev_node = at(index - 1)
-        node.next_node = prev_node.next_node
-        prev_node.next_node = node
-        node
-    end
-
-    def remove_at(index)
-        return pop if index == @size - 1
-        return @head = @head.next_node if index.zero?
-
-        prev_node = at(index - 1)
-        prev_node.next_node = prev_node.next_node.next_node
-    end
-        
 end
 
-        
 list = LinkedList.new
 
-list.append(10)
-list.append(15)
-list.prepend(3)
-list.prepend(7)
 list.append(5)
+list.append(6)
+list.prepend(4)
+list.prepend(2)
 
 p list.to_s
-
-list.remove_at(2)
-list.insert_at(88, 1)
+list.remove_at(1)
 p list.to_s
-        
-        
-
-        
